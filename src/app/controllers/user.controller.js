@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const UserService = require('../services/user.service');
+const AddressService = require('../services/address.service');
 
 function validateEmail(email) {
     const validate = /\S+@\S+\.\S+/;
@@ -20,7 +21,7 @@ function validatePassword(password) {
 const create = async (req, res) => {
     try {
         const {
-            name, email, password,
+            name, email, password, cellPhone, street, number, city, neighborhood
         } = req.body;
 
         if (!name) {
@@ -29,6 +30,10 @@ const create = async (req, res) => {
 
         if (!email) {
             return res.status(400).json({ error: 'O email é obrigatório' });
+        }
+
+        if (!cellPhone) {
+            return res.status(400).json({ error: 'O Telefone é obrigatório' });
         }
 
         if (!validateEmail(email)) {
@@ -48,6 +53,22 @@ const create = async (req, res) => {
             });
         }
 
+        if (!street) {
+            return res.status(400).json({ error: 'O nome da rua é obrigatório' });
+        }
+
+        if (!number) {
+            return res.status(400).json({ error: 'O numero é obrigatório' });
+        }
+
+        if (!city) {
+            return res.status(400).json({ error: 'A cidade é obrigatória' });
+        }
+
+        if (!neighborhood) {
+            return res.status(400).json({ error: 'O bairro é obrigatório' });
+        }
+
         const verifyUserByEmail = await UserService.getByEmail(email);
 
         if (verifyUserByEmail) {
@@ -56,9 +77,10 @@ const create = async (req, res) => {
                 .json({ error: 'Já existe um usuário com esse email' });
         }
 
-        let data = {
+        const data = {
             name,
             email,
+            cellPhone,
             password,
         };
 
@@ -70,7 +92,20 @@ const create = async (req, res) => {
                 .json({ error: 'Não foi possível criar o novo usuário' });
         }
 
-        return res.status(201).json({ user });
+        const addressData = {
+            street, 
+            number, 
+            city, 
+            neighborhood,
+            userId: user.id
+        }
+
+        await AddressService.create(addressData);
+
+        const resultUser = await UserService.getByIdWithAddress(user.id);
+
+        return res.status(201).json(resultUser);
+
     } catch (error) {
         return res.status(500).json({ error: `Ocorreu um erro: ${error.message}` });
     }
@@ -138,7 +173,6 @@ const update = async (req, res) => {
         return res.status(500).json({ error: `Ocorreu um erro: ${error.message}` });
     }
 };
-
 
 
 module.exports = {

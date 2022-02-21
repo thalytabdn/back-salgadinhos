@@ -1,7 +1,7 @@
 const { Op } = require('sequelize');
 const bcrypt = require('bcryptjs');
 
-const { User } = require('../models');
+const { User, Address } = require('../models');
 const util = require('./util.service');
 
 const create = async (data) => {
@@ -14,10 +14,7 @@ const create = async (data) => {
     delete user.dataValues.passwordHash;
     delete user.dataValues.password;
 
-    return {
-        user,
-        token: util.generateToken({ id: user.id, email: user.email }),
-    };
+    return user;
 };
 
 const getAll = async (query) => {
@@ -68,6 +65,7 @@ const getAll = async (query) => {
                 'id',
                 'name',
                 'email',
+                'cellPhone',
                 'role',
             ],
             where,
@@ -82,6 +80,7 @@ const getAll = async (query) => {
                 'id',
                 'name',
                 'email',
+                'cellPhone',
                 'role',
             ],
             where,
@@ -102,6 +101,7 @@ const getById = async (id) => {
             'id',
             'name',
             'email',
+            'cellPhone',
             'role',
         ],
     });
@@ -113,7 +113,33 @@ const getById = async (id) => {
     return user;
 };
 
+const getByIdWithAddress = async (id) => {
+    const user = await User.findByPk(id, {
+        attributes: [
+            'id',
+            'name',
+            'email',
+            'cellPhone',
+            'role',
+        ],
+        include: [
+            {
+              model: Address,
+              as: 'address',
+              attributes: ['id', "street", "number", "city", 'neighborhood'],
+            },
+          ],
+    });
 
+    if (!user) {
+        return null;
+    }
+
+    return {
+        user,
+        token: util.generateToken({ id: user.id, email: user.email }),
+    };
+};
 
 const getByEmail = async (email) => {
     const user = await User.findOne({
@@ -132,7 +158,7 @@ const getByEmail = async (email) => {
 
 const remove = async (id) => {
     const user = await User.findByPk(id, {
-        attributes: ['id', 'name', 'email', 'role'],
+        attributes: ['id', 'name', 'email', 'cellPhone', 'role'],
     });
 
     if (!user) {
@@ -146,7 +172,7 @@ const remove = async (id) => {
 
 const update = async (id, name) => {
     const user = await User.findByPk(id, {
-        attributes: ['id', 'name', 'email', 'role'],
+        attributes: ['id', 'name', 'email', 'cellPhone', 'role'],
     });
 
     if (!user) {
@@ -174,6 +200,7 @@ module.exports = {
     create,
     getAll,
     getById,
+    getByIdWithAddress,
     getByEmail,
     remove,
     update,
