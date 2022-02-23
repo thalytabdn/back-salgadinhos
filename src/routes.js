@@ -7,6 +7,7 @@ const AuthMiddleware = require('./app/middlewares/auth.middleware');
 const AuthRoute = require('./app/routes/auth.route');
 const UserRoute = require('./app/routes/user.route');
 const RegisterRoute = require('./app/routes/register.route');
+const FlavorRoute = require('./app/routes/flavor.route');
 
 // public routes
 
@@ -21,5 +22,7 @@ router.use('/user', RegisterRoute);
 
 router.use(AuthMiddleware.login);
 router.use('/user', UserRoute);
+router.use('/flavor', FlavorRoute);
+
 
 module.exports = router;
