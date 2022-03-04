@@ -65,13 +65,13 @@ const create = async (req, res) => {
 
 const getAll = async (req, res) => {
     try {
-        const flavors = await ItemService.getAll(req.query);
+        const items = await ItemService.getAll(req.query);
 
-        if (!flavors) {
+        if (!items) {
             return res.status(404).json({ error: 'Nenhum sabor foi encontrado' });
         }
 
-        return res.status(200).json({ flavors });
+        return res.status(200).json({ items });
     } catch (error) {
         return res.status(500).json({ error: `Ocorreu um erro: ${error.message}` });
     }

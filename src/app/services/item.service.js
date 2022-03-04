@@ -1,6 +1,6 @@
 const { Op } = require('sequelize');
 
-const { Item } = require('../models');
+const { Item, Flavor } = require('../models');
 
 const create = async (data) => {
     const item = await Item.create(data);
@@ -32,9 +32,14 @@ const getAll = async (query) => {
                 'imageLink',
                 'price',
                 'quantity',
-                'flavorId',
             ],
             order: [['id', 'ASC']],
+            include: [
+                {
+                    model: Flavor,
+                    as: "flavor"
+                }
+            ]
         };
         items = await Item.findAndCountAll(options);
 
@@ -47,9 +52,15 @@ const getAll = async (query) => {
                 'imageLink',
                 'price',
                 'quantity',
-                'flavorId',
             ],
             order: [['id', 'ASC']],
+            include: [
+                {
+                    model: Flavor,
+                    as: "flavor",
+                    attributes: ["id", "name"]
+                }
+            ]
         });
     }
 
@@ -68,8 +79,14 @@ const getById = async (id) => {
             'imageLink',
             'price',
             'quantity',
-            'flavorId',
         ],
+        include: [
+            {
+                model: Flavor,
+                as: "flavor",
+                attributes: ["id", "name"]
+            }
+        ]
     });
 
     if (!item) {
