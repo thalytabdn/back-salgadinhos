@@ -4,11 +4,23 @@ const { Item, Flavor, PurchaseItem } = require('../models');
 
 const add = async (data) => {
 
-    const { itemId, itemPrice, quantity } = data;
+    let { itemId, itemPrice, quantity, purchaseId } = data;
 
-    const price = itemPrice * quantity;
+    let price = itemPrice * quantity;
 
-    const purchaseItem = await PurchaseItem.create( { itemId, quantity, price });
+    let purchaseItem = await verifyPurchaseItemExists(itemId, purchaseId);
+
+    if(!purchaseItem) {
+
+        purchaseItem = await PurchaseItem.create( { itemId, quantity, price, purchaseId });
+
+    }else {
+
+        quantity = purchaseItem.quantity + quantity;
+        price = itemPrice * quantity;
+
+        purchaseItem = await purchaseItem.update( { quantity, price });
+    }
 
     if (!purchaseItem) {
         return null;
@@ -16,6 +28,24 @@ const add = async (data) => {
 
     return purchaseItem;
 };
+
+
+const verifyPurchaseItemExists = async (itemId, purchaseId) => {
+
+
+    const purchaseItem = await PurchaseItem.findOne( {
+        where: {
+            itemId, 
+            purchaseId
+        }
+    });
+
+    if (!purchaseItem) {
+        return null;
+    }
+
+    return purchaseItem;
+}
 
 
 

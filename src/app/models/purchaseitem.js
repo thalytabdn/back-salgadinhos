@@ -14,12 +14,17 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'itemId',
         as: 'item',
       });
+      PurchaseItem.belongsTo(models.Purchase, {
+        foreignKey: 'purchaseId',
+        as: 'purchase',
+      });
     }
   }
   PurchaseItem.init({
     quantity: DataTypes.INTEGER,
     price: DataTypes.FLOAT,
-    itemId: DataTypes.INTEGER
+    itemId: DataTypes.INTEGER,
+    purchaseId: DataTypes.INTEGER,
   }, {
     sequelize,
     modelName: 'PurchaseItem',

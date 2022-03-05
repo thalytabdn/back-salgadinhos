@@ -9,6 +9,7 @@ const UserRoute = require('./app/routes/user.route');
 const RegisterRoute = require('./app/routes/register.route');
 const FlavorRoute = require('./app/routes/flavor.route');
 const ItemRoute = require('./app/routes/item.route');
+const PurchaseRoute = require('./app/routes/purchase.route');
 const PurchaseItemRoute = require('./app/routes/purchaseItem.route');
 
 // public routes
@@ -26,7 +27,8 @@ router.use(AuthMiddleware.login);
 router.use('/user', UserRoute);
 router.use('/flavor', FlavorRoute);
 router.use('/item', ItemRoute);
-router.use('/item', PurchaseItemRoute);
+router.use('/purchase', PurchaseRoute);
+router.use('/purchase', PurchaseItemRoute);
 
 
 module.exports = router;
