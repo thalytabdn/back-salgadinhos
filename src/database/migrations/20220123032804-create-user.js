@@ -21,8 +21,9 @@ module.exports = {
         allowNull: false
       },
       role: {
-        type: Sequelize.STRING,
-        defaultValue: "admin"
+        type: Sequelize.ENUM,
+        values: ['admin', 'user'],
+        defaultValue: "user"
       },
       passwordHash: {
         type: Sequelize.STRING

@@ -23,8 +23,9 @@ module.exports = (sequelize, DataTypes) => {
     cellPhone: DataTypes.STRING,
     passwordHash: DataTypes.STRING,
     role: {
-      type: DataTypes.STRING,
-      defaultValue: "admin"
+      type: DataTypes.ENUM,
+      values: ['admin', 'user'],
+      defaultValue: "user"
     },
     password: DataTypes.VIRTUAL,
   }, {

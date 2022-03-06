@@ -117,11 +117,24 @@ const getAll = async (query) => {
     return purchases;
 };
 
+const update = async (id, data) => {
+    const purchase = await Purchase.findByPk(id);
+
+    if (!purchase) {
+        return null;
+    }
+
+    await purchase.update(data);
+
+    return purchase;
+};
+
 
 
 module.exports = {
     create,
     getPurchaseById,
     getInProgressPurchaseByUserId,
-    getAll
+    getAll,
+    update
 };

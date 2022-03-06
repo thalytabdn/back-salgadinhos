@@ -104,6 +104,13 @@ const getById = async (id) => {
             'cellPhone',
             'role',
         ],
+        include: [
+            {
+              model: Address,
+              as: 'address',
+              attributes: ['id', "street", "number", "city", 'neighborhood'],
+            },
+          ],
     });
 
     if (!user) {
@@ -170,7 +177,7 @@ const remove = async (id) => {
     return user;
 };
 
-const update = async (id, name) => {
+const update = async (id, data) => {
     const user = await User.findByPk(id, {
         attributes: ['id', 'name', 'email', 'cellPhone', 'role'],
     });
@@ -179,7 +186,7 @@ const update = async (id, name) => {
         return null;
     }
 
-    await user.update({ name });
+    await user.update(data);
 
     return user;
 };

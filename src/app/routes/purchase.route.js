@@ -9,6 +9,7 @@ const { ADMIN, CLIENT } = require('../enums/permission.enum');
 
 
 router.get('/', permission(ADMIN, CLIENT), PurchaseController.getAll);
+router.put('/:purchaseId', permission(ADMIN, CLIENT), PurchaseController.update);
 
 
 module.exports = router;

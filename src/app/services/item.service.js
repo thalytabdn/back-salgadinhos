@@ -14,6 +14,22 @@ const create = async (data) => {
 
 const getAll = async (query) => {
 
+    const {
+        name
+    } = query;
+
+    let where = {};
+
+    if (name) {
+        where = {
+            ...where,
+            name: {
+                [Op.iLike]: `%${name}%`,
+              },
+        };
+    }
+
+
     const page = parseInt(query.page, 10);
     const pageSize = parseInt(query.pageSize, 10);
     let offset = null;
@@ -26,6 +42,7 @@ const getAll = async (query) => {
             limit: pageSize,
             offset,
             distinct: true,
+            where,
             attributes: [
                 'id',
                 'name',
@@ -54,6 +71,7 @@ const getAll = async (query) => {
                 'quantity',
             ],
             order: [['id', 'ASC']],
+            where,
             include: [
                 {
                     model: Flavor,

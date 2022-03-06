@@ -8,10 +8,11 @@ const permission = require('../middlewares/permission.middleware');
 const { ADMIN, CLIENT } = require('../enums/permission.enum');
 
 router.get('/', permission(ADMIN), UserController.getAll);
-router.get('/:userId', permission(ADMIN), UserController.getById);
+router.get('/:userId', permission(CLIENT), UserController.getById);
+router.get('/:userId/address', permission(ADMIN), UserController.getByIdWithAddress);
 
 router.delete('/:userId', permission(ADMIN), UserController.remove);
-router.put('/:userId', permission(ADMIN), UserController.update);
+router.put('/', permission(CLIENT), UserController.update);
 
 
 module.exports = router;

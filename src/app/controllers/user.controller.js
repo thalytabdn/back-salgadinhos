@@ -1,4 +1,3 @@
-const crypto = require('crypto');
 const UserService = require('../services/user.service');
 const AddressService = require('../services/address.service');
 
@@ -141,6 +140,22 @@ const getById = async (req, res) => {
     }
 };
 
+const getByIdWithAddress = async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        const user = await UserService.getByIdWithAddress(userId);
+
+        if (!user) {
+            return res.status(404).json({ error: 'O usuário não foi encontrado' });
+        }
+
+        return res.status(200).json({ user });
+    } catch (error) {
+        return res.status(500).json({ error: `Ocorreu um erro: ${error.message}` });
+    }
+};
+
 const remove = async (req, res) => {
     try {
         const { userId } = req.params;
@@ -159,16 +174,22 @@ const remove = async (req, res) => {
 
 const update = async (req, res) => {
     try {
-        const { userId } = req.params;
-        const { name } = req.body;
+        
+        const { id: userId } = req.user;
 
-        const user = await UserService.update(userId, name);
+        const { name, cellPhone, street, number, city, neighborhood } = req.body;
+
+        const user = await UserService.update(userId, { name, cellPhone });
 
         if (!user) {
             return res.status(404).json({ error: 'O usuário não foi encontrado' });
         }
 
-        return res.status(200).json({ user });
+        await AddressService.update(userId, { street, number, city, neighborhood });
+
+        const result = await UserService.getById(userId);
+
+        return res.status(200).json({ user: result });
     } catch (error) {
         return res.status(500).json({ error: `Ocorreu um erro: ${error.message}` });
     }
@@ -179,6 +200,7 @@ module.exports = {
     create,
     getAll,
     getById,
+    getByIdWithAddress,
     remove,
     update,
 };

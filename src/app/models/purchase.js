@@ -18,9 +18,32 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Purchase.init({
-    status: DataTypes.STRING,
+    status: {
+      type: DataTypes.ENUM,
+      values: ['PROGRESS', 'CANCELED', "PROCESSING", "APPROVAD", "FINISHED"],
+      defaultValue: "PROGRESS",
+    },
+    paymentMethod: {
+      type: DataTypes.ENUM,
+      values: ['PIX', 'DEBITO', "CREDITO", "DINHEIRO"],
+      defaultValue: 'DINHEIRO',
+    },
+    deliveryMethod: {
+      type: DataTypes.ENUM,
+      values: ['ENVIO', 'RETIRADA'],
+      defaultValue: 'RETIRADA',
+    },
+    price: DataTypes.FLOAT,
+    deliveryPrice: DataTypes.FLOAT,
+    totalPrice: DataTypes.FLOAT,
+    transshipment: DataTypes.FLOAT,
+    details: DataTypes.STRING,
+    date: DataTypes.STRING,
+    hour: DataTypes.STRING,
+    address: DataTypes.STRING,
+    phoneNumber: DataTypes.STRING,
     userId: DataTypes.INTEGER,
-    details: DataTypes.STRING
+
   }, {
     sequelize,
     modelName: 'Purchase',
