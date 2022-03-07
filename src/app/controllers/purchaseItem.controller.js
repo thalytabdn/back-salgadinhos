@@ -59,13 +59,16 @@ const add = async (req, res) => {
         let result = await PurchaseService.getPurchaseById(purchase.id);
 
         
-        result = await Promise.all(result.purchaseItems.map( async (r) => {
+        const arrayPurchase = await Promise.all(result.purchaseItems.map( async (r) => {
 
             const flavor = await FlavorService.getByFlavorAndItem(r.flavorId, r.itemId);
 
             return {...r.dataValues, flavor};
 
         }));
+
+        delete result.dataValues.purchaseItems;
+        result.dataValues.arrayPurchaseItems = arrayPurchase;
 
         return res.status(201).json({ purchase: result});
 

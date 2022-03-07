@@ -69,13 +69,16 @@ const getById = async (req, res) => {
             return res.status(404).json({ error: 'O carrinho não foi encontrado' });
         }
 
-        purchase.purchaseItems = await Promise.all(purchase.purchaseItems.map( async (r) => {
+        const arrayPurchase = await Promise.all(purchase.purchaseItems.map( async (r) => {
 
             const flavor = await FlavorService.getByFlavorAndItem(r.flavorId, r.itemId);
 
             return {...r.dataValues, flavor};
 
         }));
+
+        delete purchase.dataValues.purchaseItems;
+        purchase.dataValues.arrayPurchaseItems = arrayPurchase;
 
         return res.status(201).json(purchase);
     } catch (error) {
