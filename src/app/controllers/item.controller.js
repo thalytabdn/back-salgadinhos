@@ -9,7 +9,9 @@ const create = async (req, res) => {
             imageLink,
             price,
             quantity,
-            flavorId,
+            flavors,
+            itemClass,
+
 
         } = req.body;
 
@@ -29,23 +31,21 @@ const create = async (req, res) => {
             return res.status(400).json({ error: 'O preço não pode ser negativo' });
         }
 
-        if (!flavorId) {
-            return res.status(400).json({ error: 'O sabor do item é obrigatório' });
-        }
-
-        const flavor = await FlavorService.getById(flavorId);
-
-        if (!flavor) {
-            return res.status(404).json({ error: 'O sabor não foi encontrado' }); 
-        }
-
         const data = {
             name,
             imageLink,
             price,
             quantity,
-            flavorId,
+            itemClass
         };
+
+        const itemExists = await ItemService.getByName(name);
+
+        if(itemExists) {
+            return res.status(400).json({ error: 'Esse produto já existe' });
+        }
+
+        
 
         const item = await ItemService.create(data);
 
@@ -55,8 +55,18 @@ const create = async (req, res) => {
                 .json({ error: 'Não foi possível criar o novo item' });
         }
 
+        await Promise.all(flavors.map( async (flavor) => {
 
-        return res.status(201).json(item);
+            await FlavorService.create({
+                itemId: item.id,
+                name: flavor
+            })
+
+        }))
+
+        const result = await ItemService.getById(item.id);
+
+        return res.status(201).json({item: result});
 
     } catch (error) {
         return res.status(500).json({ error: `Ocorreu um erro: ${error.message}` });
@@ -68,7 +78,7 @@ const getAll = async (req, res) => {
         const items = await ItemService.getAll(req.query);
 
         if (!items) {
-            return res.status(404).json({ error: 'Nenhum sabor foi encontrado' });
+            return res.status(404).json({ error: 'Nenhum produto foi encontrado' });
         }
 
         return res.status(200).json({ items });
@@ -84,7 +94,7 @@ const getById = async (req, res) => {
         const item = await ItemService.getById(itemId);
 
         if (!item) {
-            return res.status(404).json({ error: 'O sabor não foi encontrado' });
+            return res.status(404).json({ error: 'O produto não foi encontrado' });
         }
 
         return res.status(200).json({ item });
@@ -95,16 +105,16 @@ const getById = async (req, res) => {
 
 const getByName = async (req, res) => {
     try {
-        const { flavorName } = req.query;
+        const { itemName } = req.query;
 
-        if (!flavorName){
-            return res.status(404).json({ error: 'O nome do sabor é obrigatório' });
+        if (!itemName){
+            return res.status(404).json({ error: 'O nome do produto é obrigatório' });
         }
 
-        const item = await ItemService.getByName(flavorName);
+        const item = await ItemService.getByName(itemName);
 
         if (!item) {
-            return res.status(404).json({ error: 'Nenhum sabor foi encontrado' });
+            return res.status(404).json({ error: 'Nenhum produto foi encontrado' });
         }
 
         return res.status(200).json({ item });
@@ -120,7 +130,7 @@ const remove = async (req, res) => {
         const item = await ItemService.remove(itemId);
 
         if (!item) {
-            return res.status(404).json({ error: 'O sabor não foi encontrado' });
+            return res.status(404).json({ error: 'O item não foi encontrado' });
         }
 
         return res.status(200).json({ item });
@@ -152,6 +162,87 @@ const update = async (req, res) => {
     }
 };
 
+const addflavor = async (req, res) => {
+    try {
+        const { itemId } = req.params;
+        
+        const { 
+            flavors
+        } = req.body;
+
+        const item = await ItemService.getById(itemId);
+
+        if (!item) {
+            return res.status(404).json({ error: 'O item não foi encontrado' });
+        }
+
+        await Promise.all(flavors.map( async (flavor) => {
+
+            await FlavorService.create({
+                itemId: item.id,
+                name: flavor
+            })
+
+        }))
+
+        const result = await ItemService.getById(item.id);
+
+        return res.status(201).json({item: result});
+
+    } catch (error) {
+        return res.status(500).json({ error: `Ocorreu um erro: ${error.message}` });
+    }
+}
+
+const removeflavor = async (req, res) => {
+    try {
+        const { itemId } = req.params;
+        
+        const { 
+            flavors
+        } = req.body;
+
+        const item = await ItemService.getById(itemId);
+
+        if (!item) {
+            return res.status(404).json({ error: 'O item não foi encontrado' });
+        }
+
+        await Promise.all(flavors.map( async (flavor) => {
+
+            await FlavorService.remove({
+                itemId: item.id,
+                name: flavor
+            })
+
+        }))
+
+        const result = await ItemService.getById(item.id);
+
+        return res.status(201).json({item: result});
+
+    } catch (error) {
+        return res.status(500).json({ error: `Ocorreu um erro: ${error.message}` });
+    }
+}
+
+const getAllFlavorsByItemId = async (req, res) => {
+    try {
+        const { itemId } = req.params;
+
+        const item = await ItemService.getById(itemId);
+
+        if (!item) {
+            return res.status(404).json({ error: 'O produto não foi encontrado' });
+        }
+
+        const flavors = await FlavorService.getAll(req.query, itemId);
+
+        return res.status(200).json(flavors);
+    } catch (error) {
+        return res.status(500).json({ error: `Ocorreu um erro: ${error.message}` });
+    }
+}
 
 module.exports = {
     create,
@@ -160,4 +251,7 @@ module.exports = {
     getByName,
     remove,
     update,
+    addflavor,
+    removeflavor,
+    getAllFlavorsByItemId
 };

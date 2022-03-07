@@ -15,7 +15,8 @@ const create = async (data) => {
 const getAll = async (query) => {
 
     const {
-        name
+        name,
+        itemClass,
     } = query;
 
     let where = {};
@@ -25,6 +26,15 @@ const getAll = async (query) => {
             ...where,
             name: {
                 [Op.iLike]: `%${name}%`,
+              },
+        };
+    }
+
+    if (itemClass) {
+        where = {
+            ...where,
+            itemClass: {
+                [Op.iLike]: `%${itemClass}%`,
               },
         };
     }
@@ -49,12 +59,13 @@ const getAll = async (query) => {
                 'imageLink',
                 'price',
                 'quantity',
+                'itemClass',
             ],
             order: [['id', 'ASC']],
             include: [
                 {
                     model: Flavor,
-                    as: "flavor"
+                    as: "flavors"
                 }
             ]
         };
@@ -69,13 +80,14 @@ const getAll = async (query) => {
                 'imageLink',
                 'price',
                 'quantity',
+                'itemClass',
             ],
             order: [['id', 'ASC']],
             where,
             include: [
                 {
                     model: Flavor,
-                    as: "flavor",
+                    as: "flavors",
                     attributes: ["id", "name"]
                 }
             ]
@@ -97,11 +109,12 @@ const getById = async (id) => {
             'imageLink',
             'price',
             'quantity',
+            "itemClass",
         ],
         include: [
             {
                 model: Flavor,
-                as: "flavor",
+                as: "flavors",
                 attributes: ["id", "name"]
             }
         ]
@@ -122,7 +135,7 @@ const getByName = async (name) => {
             'imageLink',
             'price',
             'quantity',
-            'flavorId',
+            "itemClass",
         ],
         where: {
             name: {
@@ -146,7 +159,7 @@ const remove = async (id) => {
             'imageLink',
             'price',
             'quantity',
-            'flavorId',
+            "itemClass",
         ],
     });
 
@@ -167,7 +180,7 @@ const update = async (id, data) => {
             'imageLink',
             'price',
             'quantity',
-            'flavorId',
+            "itemClass",
         ],
     });
 

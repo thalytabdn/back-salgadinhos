@@ -3,6 +3,13 @@ const { Op } = require('sequelize');
 const { Flavor } = require('../models');
 
 const create = async (data) => {
+
+    const flavorExist = await getByName(data.name, data.itemId);
+
+    if (flavorExist) {
+        return null;
+    }
+
     const flavor = await Flavor.create(data);
 
     if (!flavor) {
@@ -12,7 +19,11 @@ const create = async (data) => {
     return flavor;
 };
 
-const getAll = async (query) => {
+const getAll = async (query, itemId) => {
+
+    let where = {
+        itemId
+    }
 
     const page = parseInt(query.page, 10);
     const pageSize = parseInt(query.pageSize, 10);
@@ -26,6 +37,7 @@ const getAll = async (query) => {
             limit: pageSize,
             offset,
             distinct: true,
+            where,
             attributes: [
                 'id',
                 'name',,
@@ -37,6 +49,7 @@ const getAll = async (query) => {
         flavors.pages = Math.ceil(flavors.count / pageSize);
     } else {
         flavors = await Flavor.findAll({
+            where,
             attributes: [
                 'id',
                 'name',
@@ -67,13 +80,37 @@ const getById = async (id) => {
     return flavor;
 };
 
-const getByName = async (name) => {
+const getByFlavorAndItem = async (flavorId, itemId) => {
+    const flavor = await Flavor.findOne(
+        
+        {
+            where: {
+                id: flavorId,
+                itemId
+            },
+            attributes: [
+                'id',
+                'name',
+            ],
+        }
+    );
+
+    if (!flavor) {
+        return null;
+    }
+
+    return flavor;
+};
+
+const getByName = async (name, itemId) => {
+
     const flavor = await Flavor.findOne({
         attributes: ['id', 'name'],
         where: {
             name: {
                 [Op.iLike]: `${name}`,
               },
+            itemId
         },
     });
 
@@ -84,10 +121,8 @@ const getByName = async (name) => {
     return flavor;
 };
 
-const remove = async (id) => {
-    const flavor = await Flavor.findByPk(id, {
-        attributes: ['id', 'name'],
-    });
+const remove = async (data) => {
+    const flavor = await getByName(data.name, data.itemId);
 
     if (!flavor) {
         return null;
@@ -98,26 +133,13 @@ const remove = async (id) => {
     return flavor;
 };
 
-const update = async (id, name) => {
-    const flavor = await Flavor.findByPk(id, {
-        attributes: ['id', 'name'],
-    });
-
-    if (!flavor) {
-        return null;
-    }
-
-    await flavor.update({ name });
-
-    return flavor;
-};
 
 
 module.exports = {
     create,
     getAll,
     getById,
+    getByFlavorAndItem,
     getByName,
     remove,
-    update,
 };

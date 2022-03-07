@@ -14,5 +14,10 @@ router.delete('/:itemId', permission(ADMIN), ItemController.remove);
 router.put('/:itemId', permission(ADMIN), ItemController.update);
 router.post('/', permission(ADMIN), ItemController.create);
 
+router.post('/:itemId/addFlavor', permission(ADMIN), ItemController.addflavor);
+router.delete('/:itemId/removeFlavor', permission(ADMIN), ItemController.removeflavor);
+
+router.get('/:itemId/flavors', permission(CLIENT), ItemController.getAllFlavorsByItemId);
+
 
 module.exports = router;

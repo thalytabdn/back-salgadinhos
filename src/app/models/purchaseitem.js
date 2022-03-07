@@ -14,6 +14,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'itemId',
         as: 'item',
       });
+      PurchaseItem.belongsTo(models.Item, {
+        foreignKey: 'flavorId',
+        as: 'flavor',
+      });
       PurchaseItem.belongsTo(models.Purchase, {
         foreignKey: 'purchaseId',
         as: 'purchase',
@@ -25,6 +29,7 @@ module.exports = (sequelize, DataTypes) => {
     price: DataTypes.FLOAT,
     itemId: DataTypes.INTEGER,
     purchaseId: DataTypes.INTEGER,
+    flavorId: DataTypes.INTEGER,
   }, {
     sequelize,
     modelName: 'PurchaseItem',

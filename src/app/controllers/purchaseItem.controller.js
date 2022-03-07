@@ -1,7 +1,7 @@
 const ItemService = require('../services/item.service');
+const FlavorService = require('../services/flavor.service');
 const PurchaseItemService = require('../services/purchaseItem.service');
 const PurchaseService = require('../services/purchase.service');
-
 
 const add = async (req, res) => {
     try {
@@ -9,7 +9,7 @@ const add = async (req, res) => {
             quantity,
         } = req.body;
 
-        const { itemId } = req.params;
+        const { itemId, flavorId } = req.params;
 
         const { id: userId } = req.user;
 
@@ -24,9 +24,13 @@ const add = async (req, res) => {
             return res.status(404).json({ error: 'O item não foi encontrado' }); 
         }
 
+        const flavor = await FlavorService.getByFlavorAndItem(flavorId, itemId);
+
+        if (!flavor) {
+            return res.status(404).json({ error: 'O sabor não foi encontrado' }); 
+        }
 
         let purchase = await PurchaseService.getInProgressPurchaseByUserId(userId);
-
 
         if (!purchase){
             purchase = await PurchaseService.create(userId);
@@ -38,6 +42,7 @@ const add = async (req, res) => {
 
         const data = {
             itemId,
+            flavorId,
             itemPrice: item.price,
             quantity,
             purchaseId: purchase.id
@@ -51,8 +56,16 @@ const add = async (req, res) => {
                 .json({ error: 'Não foi possível adicionar a nova compra' });
         }
 
-        const result = await PurchaseService.getPurchaseById(purchase.id);
+        let result = await PurchaseService.getPurchaseById(purchase.id);
 
+        
+        result = await Promise.all(result.purchaseItems.map( async (r) => {
+
+            const flavor = await FlavorService.getByFlavorAndItem(r.flavorId, r.itemId);
+
+            return {...r.dataValues, flavor};
+
+        }));
 
         return res.status(201).json({ purchase: result});
 

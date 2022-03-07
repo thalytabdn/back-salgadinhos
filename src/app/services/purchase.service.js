@@ -23,18 +23,14 @@ const getPurchaseById = async (purchaseId) => {
             {
                 model: PurchaseItem,
                 as: "purchaseItems",
+                attributes: {
+                    exclude: ["createdAt", "updatedAt"]
+                },
                 include: [
                     {
                         model: Item,
                         as: "item",
-                        include: [
-                            {
-                                model: Flavor,
-                                as: "flavor"
-        
-                            }
-                        ]
-
+                        attributes: ["id", "name", "price", "imageLink", "itemClass"],
                     }
                 ]
             }

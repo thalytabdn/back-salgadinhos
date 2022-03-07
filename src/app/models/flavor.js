@@ -10,7 +10,10 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      Flavor.hasMany(models.Item, { foreignKey: 'flavorId', as: 'itens' });
+      Flavor.belongsTo(models.Item, {
+        foreignKey: 'itemId',
+        as: 'item',
+      });
     }
   }
   Flavor.init({

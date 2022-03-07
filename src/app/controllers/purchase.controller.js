@@ -1,4 +1,5 @@
 const PurchaseService = require('../services/purchase.service');
+const FlavorService = require('../services/flavor.service');
 
 
 const getAll = async (req, res) => {
@@ -58,8 +59,32 @@ const update = async (req, res) => {
     }
 };
 
+const getById = async (req, res) => {
+    try {
+        const { purchaseId } = req.params;
+        
+        let purchase = await PurchaseService.getPurchaseById(purchaseId);
+
+        if (!purchase) {
+            return res.status(404).json({ error: 'O carrinho não foi encontrado' });
+        }
+
+        purchase.purchaseItems = await Promise.all(purchase.purchaseItems.map( async (r) => {
+
+            const flavor = await FlavorService.getByFlavorAndItem(r.flavorId, r.itemId);
+
+            return {...r.dataValues, flavor};
+
+        }));
+
+        return res.status(201).json(purchase);
+    } catch (error) {
+        return res.status(500).json({ error: `Ocorreu um erro: ${error.message}` });
+    }
+};
 
 module.exports = {
     getAll,
     update,
+    getById,
 };
