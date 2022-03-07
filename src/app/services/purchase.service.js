@@ -1,6 +1,4 @@
-const { Op } = require('sequelize');
-
-const { Purchase, PurchaseItem, Item, Flavor } = require('../models');
+const { Purchase, PurchaseItem, Item } = require('../models');
 
 const create = async (userId) => {
 
@@ -125,6 +123,18 @@ const update = async (id, data) => {
     return purchase;
 };
 
+const removePurchase = async (purchaseId) => {
+
+    const purchase = await Purchase.findByPk(purchaseId);
+
+    if (!purchase) {
+        return null;
+    }
+
+    await purchase.destroy();
+
+    return purchase;
+}
 
 
 module.exports = {
@@ -132,5 +142,6 @@ module.exports = {
     getPurchaseById,
     getInProgressPurchaseByUserId,
     getAll,
-    update
+    update,
+    removePurchase
 };

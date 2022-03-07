@@ -1,6 +1,6 @@
 const { Op } = require('sequelize');
 
-const { Item, Flavor, PurchaseItem } = require('../models');
+const { Purchase, PurchaseItem } = require('../models');
 
 const add = async (data) => {
 
@@ -29,6 +29,20 @@ const add = async (data) => {
     return purchaseItem;
 };
 
+const remove = async (data) => {
+
+    let { flavorId, purchaseId } = data;
+
+    let purchaseItem = await verifyPurchaseItemExists(flavorId, purchaseId);
+
+    if (!purchaseItem) {
+        return null;
+    }
+
+    purchaseItem = await purchaseItem.destroy();
+    
+    return purchaseItem;
+};
 
 const verifyPurchaseItemExists = async (flavorId, purchaseId) => {
 
@@ -47,9 +61,7 @@ const verifyPurchaseItemExists = async (flavorId, purchaseId) => {
     return purchaseItem;
 }
 
-
-
-
 module.exports = {
     add,
+    remove,
 };

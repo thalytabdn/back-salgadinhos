@@ -86,8 +86,37 @@ const getById = async (req, res) => {
     }
 };
 
+const removePurchase = async (req, res) => {
+    try {
+
+        const { purchaseId } = req.params;
+
+        const { id: userId } = req.user;
+
+        let purchase = await PurchaseService.getInProgressPurchaseByUserId(userId);
+
+        if (!purchase) {
+            return res.status(404).json({ error: 'Não foi possível encontrar um carrinho' }); 
+        }
+
+        purchase = await PurchaseService.removePurchase(purchaseId);
+
+        if (!purchase) {
+            return res
+                .status(400)
+                .json({ error: 'Não foi possível remover o carrinho' });
+        }
+
+        return res.status(201).json(purchase);
+
+    } catch (error) {
+        return res.status(500).json({ error: `Ocorreu um erro: ${error.message}` });
+    }
+};
+
 module.exports = {
     getAll,
     update,
     getById,
+    removePurchase,
 };
