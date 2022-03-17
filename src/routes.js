@@ -11,6 +11,7 @@ const FlavorRoute = require('./app/routes/flavor.route');
 const ItemRoute = require('./app/routes/item.route');
 const PurchaseRoute = require('./app/routes/purchase.route');
 const PurchaseItemRoute = require('./app/routes/purchaseItem.route');
+const InteractionRoute = require('./app/routes/interaction.route');
 
 // public routes
 
@@ -29,6 +30,7 @@ router.use('/flavor', FlavorRoute);
 router.use('/item', ItemRoute);
 router.use('/purchase', PurchaseRoute);
 router.use('/purchase', PurchaseItemRoute);
+router.use('/interaction', InteractionRoute);
 
 
 module.exports = router;
