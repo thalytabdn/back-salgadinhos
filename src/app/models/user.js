@@ -28,6 +28,8 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: "user"
     },
     password: DataTypes.VIRTUAL,
+    passwordResetToken: DataTypes.STRING,
+    passwordResetExpires: DataTypes.DATE,
   }, {
     sequelize,
     modelName: 'User',

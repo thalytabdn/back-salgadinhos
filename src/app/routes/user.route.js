@@ -13,6 +13,6 @@ router.get('/:userId/address', permission(ADMIN), UserController.getByIdWithAddr
 
 router.delete('/:userId', permission(ADMIN), UserController.remove);
 router.put('/', permission(CLIENT), UserController.update);
-
+router.put('/alterPassword', permission(CLIENT), UserController.alterPassword);
 
 module.exports = router;

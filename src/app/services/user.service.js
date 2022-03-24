@@ -203,6 +203,51 @@ const checkPassword = async (password, id) => {
     return true;
 };
 
+const alterPassword = async (id, password) => {
+    const user = await User.findByPk(id);
+  
+    if (!user) {
+      return null;
+    }
+  
+    await user.update({
+      passwordResetToken: null,
+      passwordResetExpires: null,
+      password,
+    });
+  
+    return getById(id);
+  };
+  
+const updateToken = async (id, data) => {
+    const user = await User.findByPk(id);
+    const { passwordResetToken, passwordResetExpires } = data;
+  
+    if (!user) {
+      return null;
+    }
+  
+    await user.update({ passwordResetToken, passwordResetExpires });
+  
+    return getById(id);
+};
+
+const getByToken = async (token) => {
+
+    const user = await User.findOne({
+        attributes: ['id', 'passwordResetExpires'],
+        where: {
+        passwordResetToken: token,
+        },
+    });
+
+    if (!user) {
+        return null;
+    }
+
+    return user;
+};
+
 module.exports = {
     create,
     getAll,
@@ -212,4 +257,7 @@ module.exports = {
     remove,
     update,
     checkPassword,
+    alterPassword,
+    updateToken,
+    getByToken
 };

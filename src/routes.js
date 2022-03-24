@@ -12,6 +12,7 @@ const ItemRoute = require('./app/routes/item.route');
 const PurchaseRoute = require('./app/routes/purchase.route');
 const PurchaseItemRoute = require('./app/routes/purchaseItem.route');
 const InteractionRoute = require('./app/routes/interaction.route');
+const ResetPassword = require('./app/routes/resetPassword.route');
 
 // public routes
 
@@ -21,6 +22,7 @@ router.get('/', (req, res) => {
 
 router.use('/auth', AuthRoute);
 router.use('/user', RegisterRoute);
+router.use('/password', ResetPassword);
 
 // private routes
 

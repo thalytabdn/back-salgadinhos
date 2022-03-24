@@ -1,5 +1,8 @@
+const crypto = require('crypto');
+
 const UserService = require('../services/user.service');
 const AddressService = require('../services/address.service');
+const EmailService = require('../services/email.service');
 
 function validateEmail(email) {
     const validate = /\S+@\S+\.\S+/;
@@ -195,6 +198,128 @@ const update = async (req, res) => {
     }
 };
 
+const alterPassword = async (req, res) => {
+    try {
+
+        const { id: userId } = req.user;
+        const { password, newPassword } = req.body;
+
+
+        if (!password) {
+            return res.status(400).json({ error: 'A senha atual é obrigatória' });
+        }
+
+        if (!newPassword) {
+            return res.status(400).json({ error: 'A nova senha é obrigatória' });
+        }
+
+        const user = await UserService.getById(userId);
+
+        if (!user) {
+            return res.status(404).json({ error: 'O usuário não foi encontrado' });
+        }
+
+        const verifyPassword = await UserService.checkPassword(password, userId);
+
+        if (!verifyPassword) {
+            return res
+            .status(401)
+            .json({ error: 'A senha informada não corresponde a senha atual.' });
+        }
+
+        const validation = validatePassword(newPassword);
+
+        if (!validation) {
+            return res.status(400).json({
+            error:
+            'A senha deve conter pelo menos 8 caracteres, uma letra maiuscula e um numero',
+            });
+        }
+
+        const newUser = await UserService.alterPassword(userId, newPassword);
+
+        return res.status(200).json({ newUser });
+    } catch (error) {
+        return res.status(500).json({ error: `Ocorreu um erro: ${error.message}` });
+    }
+};
+  
+const forgotPassword = async (req, res) => {
+try {
+    const { email } = req.body;
+
+    const user = await UserService.getByEmail(email);
+
+    if (!user) {
+    return res.status(404).json({ error: 'O usuário não foi encontrado' });
+    }
+
+    const token = await crypto.randomBytes(20).toString('hex');
+    const now = new Date();
+    now.setHours(now.getHours() + 1);
+
+    const data = {
+    passwordResetToken: token,
+    passwordResetExpires: now,
+    };
+
+    await UserService.updateToken(user.id, data);
+
+    await EmailService.sendEmail(email, token);
+
+    return res.status(200).json({ msg: 'Email enviado para o usuario' });
+} catch (error) {
+    return res.status(500).json({ error: `Ocorreu um erro: ${error.message}` });
+}
+};
+
+const resetPassword = async (req, res) => {
+try {
+    const { token } = req.query;
+    const { password } = req.body;
+
+    if (!token) {
+        return res.status(400).json({ error: 'O token é obrigatório' });
+    }
+
+    const user = await UserService.getByToken(token);
+
+    if (!user) {
+    return res.status(401).json({ error: 'O token passado é inválido' });
+    }
+
+    const now = new Date();
+
+    if (now > user.dataValues.passwordResetExpires) {
+    return res.status(401).json({ error: 'O token passado expirou' });
+    }
+
+    const validation = validatePassword(password);
+
+    if (!validation) {
+    return res.status(400).json({
+        error:
+        'A senha deve conter pelo menos 8 caracteres, uma letra maiuscula e um numero',
+    });
+    }
+
+    const newUser = await UserService.alterPassword(
+    user.dataValues.id,
+    password,
+    );
+
+    if (!newUser) {
+    return res
+        .status(500)
+        .json({ error: 'Erro ao atualizar a senha do usuario' });
+    }
+
+    return res.status(200).json({ newUser });
+} catch (error) {
+    return res.status(500).json({ error: `Ocorreu um erro: ${error.message}` });
+}
+};
+
 
 module.exports = {
     create,
@@ -203,4 +328,7 @@ module.exports = {
     getByIdWithAddress,
     remove,
     update,
+    alterPassword,
+    forgotPassword,
+    resetPassword,
 };
