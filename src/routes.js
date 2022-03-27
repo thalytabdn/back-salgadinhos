@@ -12,6 +12,7 @@ const ItemRoute = require('./app/routes/item.route');
 const PurchaseRoute = require('./app/routes/purchase.route');
 const PurchaseItemRoute = require('./app/routes/purchaseItem.route');
 const InteractionRoute = require('./app/routes/interaction.route');
+const FeedbackRoute = require('./app/routes/feedback.route');
 const ResetPassword = require('./app/routes/resetPassword.route');
 
 // public routes
@@ -33,6 +34,7 @@ router.use('/item', ItemRoute);
 router.use('/purchase', PurchaseRoute);
 router.use('/purchase', PurchaseItemRoute);
 router.use('/interaction', InteractionRoute);
+router.use('/feedback', FeedbackRoute);
 
 
 module.exports = router;
