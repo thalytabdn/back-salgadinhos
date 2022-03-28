@@ -22,6 +22,7 @@ module.exports = (sequelize, DataTypes) => {
     price: DataTypes.FLOAT,
     quantity: DataTypes.INTEGER,
     itemClass: DataTypes.STRING,
+    active: DataTypes.BOOLEAN,
   }, {
     sequelize,
     modelName: 'Item',

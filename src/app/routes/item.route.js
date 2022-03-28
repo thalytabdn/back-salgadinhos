@@ -18,6 +18,7 @@ router.post('/:itemId/addFlavor', permission(ADMIN), ItemController.addflavor);
 router.delete('/:itemId/removeFlavor', permission(ADMIN), ItemController.removeflavor);
 
 router.get('/:itemId/flavors', permission(CLIENT), ItemController.getAllFlavorsByItemId);
+router.get('/:itemId/purchase', permission(CLIENT), ItemController.getPurchaseByItemId);
 
 
 module.exports = router;

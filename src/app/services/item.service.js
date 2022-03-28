@@ -1,6 +1,6 @@
 const { Op } = require('sequelize');
 
-const { Item, Flavor } = require('../models');
+const { Item, Flavor, PurchaseItem } = require('../models');
 
 const create = async (data) => {
     const item = await Item.create(data);
@@ -60,6 +60,7 @@ const getAll = async (query) => {
                 'price',
                 'quantity',
                 'itemClass',
+                'active'
             ],
             order: [['id', 'ASC']],
             include: [
@@ -81,6 +82,7 @@ const getAll = async (query) => {
                 'price',
                 'quantity',
                 'itemClass',
+                'active'
             ],
             order: [['id', 'ASC']],
             where,
@@ -110,6 +112,7 @@ const getById = async (id) => {
             'price',
             'quantity',
             "itemClass",
+            'active'
         ],
         include: [
             {
@@ -136,6 +139,7 @@ const getByName = async (name) => {
             'price',
             'quantity',
             "itemClass",
+            'active',
         ],
         where: {
             name: {
@@ -181,6 +185,7 @@ const update = async (id, data) => {
             'price',
             'quantity',
             "itemClass",
+            'active'
         ],
     });
 
@@ -193,6 +198,32 @@ const update = async (id, data) => {
     return item;
 };
 
+const getPurchaseByItemId = async (id) => {
+    const item = await Item.findByPk(id, {
+        attributes: [
+            'id',
+            'name',
+            'imageLink',
+            'price',
+            'quantity',
+            "itemClass",
+            'active'
+        ],
+        include: [
+            {
+                model: PurchaseItem,
+                as: "purchaseItems",
+                required: true
+            }
+        ]
+    });
+
+    if (!item) {
+        return null;
+    }
+
+    return item;
+};
 
 module.exports = {
     create,
@@ -201,4 +232,5 @@ module.exports = {
     getByName,
     remove,
     update,
+    getPurchaseByItemId,
 };

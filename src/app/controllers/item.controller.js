@@ -11,8 +11,6 @@ const create = async (req, res) => {
             quantity,
             flavors,
             itemClass,
-
-
         } = req.body;
 
         if (!name) {
@@ -36,7 +34,7 @@ const create = async (req, res) => {
             imageLink,
             price,
             quantity,
-            itemClass
+            itemClass,
         };
 
         const itemExists = await ItemService.getByName(name);
@@ -148,9 +146,10 @@ const update = async (req, res) => {
             imageLink,
             price,
             quantity,
+            active
         } = req.body;
 
-        const item = await ItemService.update(itemId, { name, imageLink, price, quantity });
+        const item = await ItemService.update(itemId, { name, imageLink, price, quantity, active });
 
         if (!item) {
             return res.status(404).json({ error: 'O sabor não foi encontrado' });
@@ -244,6 +243,22 @@ const getAllFlavorsByItemId = async (req, res) => {
     }
 }
 
+const getPurchaseByItemId = async (req, res) => {
+    try {
+        const { itemId } = req.params;
+
+        const item = await ItemService.getPurchaseByItemId(itemId);
+
+        if (!item) {
+            return res.status(200).json({ message: 'Nenhuma pedido associado a esse item' });
+        }
+
+        return res.status(200).json(item);
+    } catch (error) {
+        return res.status(500).json({ error: `Ocorreu um erro: ${error.message}` });
+    }
+}
+
 module.exports = {
     create,
     getAll,
@@ -253,5 +268,6 @@ module.exports = {
     update,
     addflavor,
     removeflavor,
-    getAllFlavorsByItemId
+    getAllFlavorsByItemId,
+    getPurchaseByItemId
 };

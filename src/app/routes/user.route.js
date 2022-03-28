@@ -9,7 +9,7 @@ const { ADMIN, CLIENT } = require('../enums/permission.enum');
 
 router.get('/', permission(ADMIN), UserController.getAll);
 router.get('/:userId', permission(CLIENT), UserController.getById);
-router.get('/:userId/address', permission(ADMIN), UserController.getByIdWithAddress);
+router.get('/:userId/address', permission(CLIENT), UserController.getByIdWithAddress);
 
 router.delete('/:userId', permission(ADMIN), UserController.remove);
 router.put('/', permission(CLIENT), UserController.update);
