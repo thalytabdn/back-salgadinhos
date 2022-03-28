@@ -42,6 +42,38 @@ const getPurchaseById = async (purchaseId) => {
     return purchase;
 }
 
+const getPurchaseByUserId = async (userId, status) => {
+
+    const purchase = await Purchase.findOne({
+        where: {
+            userId,
+            status
+        },
+        include: [
+            {
+                model: PurchaseItem,
+                as: "purchaseItems",
+                attributes: {
+                    exclude: ["createdAt", "updatedAt"]
+                },
+                include: [
+                    {
+                        model: Item,
+                        as: "item",
+                        attributes: ["id", "name", "price", "imageLink", "itemClass"],
+                    }
+                ]
+            }
+        ]
+    })
+
+    if (!purchase) {
+        return null;
+    }
+
+    return purchase;
+}
+
 const getInProgressPurchaseByUserId = async (userId) => {
 
     const purchase = await Purchase.findOne({
@@ -60,7 +92,7 @@ const getInProgressPurchaseByUserId = async (userId) => {
 
 const getAll = async (query) => {
     const {
-        userId, status
+        userId, status, paymentMethod, deliveryMethod, itemClass
     } = query;
 
     let where = {};
@@ -79,6 +111,29 @@ const getAll = async (query) => {
         };
     }
 
+    if (paymentMethod) {
+        where = {
+            ...where,
+            paymentMethod
+        };
+    }
+
+    if (deliveryMethod) {
+        where = {
+            ...where,
+            deliveryMethod
+        };
+    }
+
+    let classWhere = {}
+
+    if(itemClass) {
+        classWhere = {
+            ...classWhere,
+            itemClass
+        }
+    }
+
     const page = parseInt(query.page, 10);
     const pageSize = parseInt(query.pageSize, 10);
     let offset = null;
@@ -93,6 +148,18 @@ const getAll = async (query) => {
             distinct: true,
             where,
             order: [['id', 'ASC']],
+            include: [
+                {
+                    model: PurchaseItem,
+                    as: "purchaseItems",
+                    include: [
+                        {
+                            model: Item,
+                            as: "item"
+                        }
+                    ]
+                }
+            ]
         };
         purchases = await Purchase.findAndCountAll(options);
 
@@ -101,6 +168,21 @@ const getAll = async (query) => {
         purchases = await Purchase.findAll({
             where,
             order: [['id', 'ASC']],
+            include: [
+                {
+                    model: PurchaseItem,
+                    as: "purchaseItems",
+                    required: true,
+                    include: [
+                        {
+                            model: Item,
+                            as: "item",
+                            where: classWhere,
+                            
+                        }
+                    ]
+                }
+            ]
         });
     }
 
@@ -143,5 +225,6 @@ module.exports = {
     getInProgressPurchaseByUserId,
     getAll,
     update,
-    removePurchase
+    removePurchase,
+    getPurchaseByUserId
 };

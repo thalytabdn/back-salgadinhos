@@ -109,6 +109,44 @@ const getById = async (req, res) => {
     }
 };
 
+const getPurchaseByUserId = async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        const { status } = req.query;
+        
+        if (!status) {
+            return res.status(400).json({ error: 'O status é obrigatório' });
+        }
+
+        let purchase = await PurchaseService.getPurchaseByUserId(userId, status);
+
+        if (!purchase) {
+            return res.status(404).json({ error: 'O carrinho não foi encontrado' });
+        }
+
+        let itensTotalPrice = 0;
+
+        const arrayPurchase = await Promise.all(purchase.purchaseItems.map( async (r) => {
+
+            const flavor = await FlavorService.getByFlavorAndItem(r.flavorId, r.itemId);
+
+            itensTotalPrice += r.price;
+            return {...r.dataValues, flavor};
+
+        }));
+
+        delete purchase.dataValues.purchaseItems;
+        purchase.dataValues.arrayPurchaseItems = arrayPurchase;
+        purchase.dataValues.price = itensTotalPrice;
+        purchase.dataValues.totalPrice = itensTotalPrice + purchase.dataValues.deliveryPrice;
+
+        return res.status(201).json(purchase);
+    } catch (error) {
+        return res.status(500).json({ error: `Ocorreu um erro: ${error.message}` });
+    }
+};
+
 const removePurchase = async (req, res) => {
     try {
 
@@ -142,4 +180,5 @@ module.exports = {
     update,
     getById,
     removePurchase,
+    getPurchaseByUserId,
 };

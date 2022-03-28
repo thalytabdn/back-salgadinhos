@@ -10,6 +10,7 @@ const { CLIENT } = require('../enums/permission.enum');
 
 router.get('/', permission(CLIENT), PurchaseController.getAll);
 router.get('/:purchaseId', permission(CLIENT), PurchaseController.getById);
+router.get('/user/:userId', permission(CLIENT), PurchaseController.getPurchaseByUserId);
 router.put('/:purchaseId', permission(CLIENT), PurchaseController.update);
 router.delete('/:purchaseId', permission(CLIENT), PurchaseController.removePurchase);
 
