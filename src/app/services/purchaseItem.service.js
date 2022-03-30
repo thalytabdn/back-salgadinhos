@@ -31,7 +31,7 @@ const add = async (data) => {
 
 const remove = async (data) => {
 
-    let { flavorId, purchaseId } = data;
+    let { flavorId, purchaseId, quantity } = data;
 
     let purchaseItem = await verifyPurchaseItemExists(flavorId, purchaseId);
 
@@ -39,8 +39,17 @@ const remove = async (data) => {
         return null;
     }
 
-    purchaseItem = await purchaseItem.destroy();
-    
+    const total = purchaseItem.quantity - quantity;
+
+    if(total <= 0) {
+        purchaseItem = await purchaseItem.destroy();
+
+    } else {
+        purchaseItem = await purchaseItem.update({
+            quantity: total
+        })
+    }
+
     return purchaseItem;
 };
 

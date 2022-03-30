@@ -44,7 +44,7 @@ const getPurchaseById = async (purchaseId) => {
 
 const getPurchaseByUserId = async (userId, status) => {
 
-    const purchase = await Purchase.findOne({
+    const purchase = await Purchase.findAll({
         where: {
             userId,
             status

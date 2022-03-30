@@ -84,6 +84,16 @@ const remove = async (req, res) => {
 
         const { id: userId } = req.user;
 
+        const { quantity } = req.query;
+
+        if (!quantity) {
+            return res.status(400).json({ error: 'A quantidade a ser removida é obrigatória' }); 
+        }
+
+        if (quantity < 0) {
+            return res.status(400).json({ error: 'A quantidade a ser removida deve ser maior que zero' }); 
+        }
+
         const item = await ItemService.getById(itemId);
 
         if (!item) {
@@ -105,6 +115,7 @@ const remove = async (req, res) => {
         const data = {
             purchaseId,
             flavorId,
+            quantity
         };
 
         const purchaseItem = await PurchaseItemService.remove(data);
