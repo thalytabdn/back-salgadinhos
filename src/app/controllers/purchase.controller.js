@@ -113,13 +113,13 @@ const getPurchaseByUserId = async (req, res) => {
     try {
         const { userId } = req.params;
 
-        const { status } = req.query;
+        const { status, initialDate, endDate } = req.query;
         
         if (!status) {
             return res.status(400).json({ error: 'O status é obrigatório' });
         }
 
-        let purchaseList = await PurchaseService.getPurchaseByUserId(userId, status);
+        let purchaseList = await PurchaseService.getPurchaseByUserId({ userId, status,  initialDate, endDate });
 
         if (!purchaseList) {
             return res.status(404).json({ error: 'O carrinho não foi encontrado' });

@@ -1,3 +1,6 @@
+const dayjs = require('dayjs');
+const { Op } = require('sequelize');
+
 const { Purchase, PurchaseItem, Item } = require('../models');
 
 const create = async (userId) => {
@@ -42,13 +45,43 @@ const getPurchaseById = async (purchaseId) => {
     return purchase;
 }
 
-const getPurchaseByUserId = async (userId, status) => {
+const getPurchaseByUserId = async (query) => {
+
+    const {
+        userId, status, initialDate, endDate
+    } = query;
+
+    let where = {
+        userId,
+        status
+    }
+
+    const newInitialDate = dayjs(
+        dayjs(initialDate).format('YYYY-MM-DD 00:00:00.000 +00:00'),
+      ).toDate();
+      
+      const newEndDate = dayjs(
+        dayjs(endDate).format('YYYY-MM-DD 00:00:00.000 +00:00'),
+      )
+        .add(1, 'day')
+        .toDate();
+    
+      if (initialDate && endDate) {
+        where = {
+          ...where,
+          [Op.and]: [
+            {
+                createdAt: {
+                [Op.between]: [newInitialDate, newEndDate],
+              },
+            },
+          ],
+        };
+      }
 
     const purchase = await Purchase.findAll({
-        where: {
-            userId,
-            status
-        },
+        where,
+
         include: [
             {
                 model: PurchaseItem,
@@ -92,7 +125,7 @@ const getInProgressPurchaseByUserId = async (userId) => {
 
 const getAll = async (query) => {
     const {
-        userId, status, paymentMethod, deliveryMethod, itemClass
+        userId, status, paymentMethod, deliveryMethod, itemClass, initialDate, endDate
     } = query;
 
     let where = {};
@@ -124,6 +157,31 @@ const getAll = async (query) => {
             deliveryMethod
         };
     }
+
+
+    const newInitialDate = dayjs(
+        dayjs(initialDate).format('YYYY-MM-DD 00:00:00.000 +00:00'),
+      ).toDate();
+
+      const newEndDate = dayjs(
+        dayjs(endDate).format('YYYY-MM-DD 00:00:00.000 +00:00'),
+      )
+        .add(1, 'day')
+        .toDate();
+    
+      if (initialDate && endDate) {
+        where = {
+          ...where,
+          [Op.and]: [
+            {
+                createdAt: {
+                [Op.between]: [newInitialDate, newEndDate],
+              },
+            },
+          ],
+        };
+      }
+
 
     let classWhere = {}
 
