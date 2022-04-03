@@ -4,13 +4,39 @@ const FlavorService = require('../services/flavor.service');
 
 const getAll = async (req, res) => {
     try {
-        const purchase = await PurchaseService.getAll(req.query);
+        const purchases = await PurchaseService.getAll(req.query);
 
-        if (!purchase) {
+        if (!purchases) {
             return res.status(404).json({ error: 'Nenhum carrinho encontrado' });
         }
 
-        return res.status(200).json({ purchase });
+        let result = await Promise.all( purchases.map( async (purchase) => {
+
+            let itensTotalPrice = 0;
+
+            purchase.dataValues.transshipment = purchase.transshipment ? purchase.transshipment : 0;
+            purchase.dataValues.deliveryPrice = purchase.deliveryPrice ? purchase.deliveryPrice : 0;
+            purchase.dataValues.totalPrice = purchase.totalPrice ? purchase.totalPrice : 0;
+
+
+            const arrayPurchase = await Promise.all(purchase.purchaseItems.map( async (r) => {
+    
+                const flavor = await FlavorService.getByFlavorAndItem(r.flavorId, r.itemId);
+    
+                itensTotalPrice += r.price;
+                return {...r.dataValues, flavor};
+    
+            }));
+
+            delete purchase.dataValues.purchaseItems;
+            purchase.dataValues.arrayPurchaseItems = arrayPurchase;
+            purchase.dataValues.price = itensTotalPrice;
+            purchase.dataValues.totalPrice = itensTotalPrice + purchase.dataValues.deliveryPrice;
+
+            return purchase;
+        }))
+
+        return res.status(200).json({ result });
     } catch (error) {
         return res.status(500).json({ error: `Ocorreu um erro: ${error.message}` });
     }
@@ -89,6 +115,10 @@ const getById = async (req, res) => {
 
         let itensTotalPrice = 0;
 
+        purchase.dataValues.transshipment = purchase.transshipment ? purchase.transshipment : 0;
+        purchase.dataValues.deliveryPrice = purchase.deliveryPrice ? purchase.deliveryPrice : 0;
+        purchase.dataValues.totalPrice = purchase.totalPrice ? purchase.totalPrice : 0;
+
         const arrayPurchase = await Promise.all(purchase.purchaseItems.map( async (r) => {
 
             const flavor = await FlavorService.getByFlavorAndItem(r.flavorId, r.itemId);
@@ -128,6 +158,11 @@ const getPurchaseByUserId = async (req, res) => {
         let result = await Promise.all( purchaseList.map( async (purchase) => {
 
             let itensTotalPrice = 0;
+
+            purchase.dataValues.transshipment = purchase.transshipment ? purchase.transshipment : 0;
+            purchase.dataValues.deliveryPrice = purchase.deliveryPrice ? purchase.deliveryPrice : 0;
+            purchase.dataValues.totalPrice = purchase.totalPrice ? purchase.totalPrice : 0;
+
 
             const arrayPurchase = await Promise.all(purchase.purchaseItems.map( async (r) => {
     

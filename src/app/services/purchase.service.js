@@ -213,7 +213,8 @@ const getAll = async (query) => {
                     include: [
                         {
                             model: Item,
-                            as: "item"
+                            as: "item",
+                            where: classWhere,
                         }
                     ]
                 }
