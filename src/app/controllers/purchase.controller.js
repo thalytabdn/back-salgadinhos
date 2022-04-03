@@ -36,7 +36,7 @@ const getAll = async (req, res) => {
             return purchase;
         }))
 
-        return res.status(200).json({ result });
+        return res.status(200).json({ purchases: result });
     } catch (error) {
         return res.status(500).json({ error: `Ocorreu um erro: ${error.message}` });
     }
