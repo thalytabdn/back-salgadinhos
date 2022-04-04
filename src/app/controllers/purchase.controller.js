@@ -4,39 +4,77 @@ const FlavorService = require('../services/flavor.service');
 
 const getAll = async (req, res) => {
     try {
-        const purchases = await PurchaseService.getAll(req.query);
+
+        const { page, pageSize } = req.query;
+
+        let purchases = await PurchaseService.getAll(req.query);
 
         if (!purchases) {
             return res.status(404).json({ error: 'Nenhum carrinho encontrado' });
         }
 
-        let result = await Promise.all( purchases.map( async (purchase) => {
+        if (page && pageSize){
 
-            let itensTotalPrice = 0;
+            let rows = await Promise.all( purchases.rows.map( async (purchase) => {
 
-            purchase.dataValues.transshipment = purchase.transshipment ? purchase.transshipment : 0;
-            purchase.dataValues.deliveryPrice = purchase.deliveryPrice ? purchase.deliveryPrice : 0;
-            purchase.dataValues.totalPrice = purchase.totalPrice ? purchase.totalPrice : 0;
+                let itensTotalPrice = 0;
+
+                purchase.dataValues.transshipment = purchase.transshipment ? purchase.transshipment : 0;
+                purchase.dataValues.deliveryPrice = purchase.deliveryPrice ? purchase.deliveryPrice : 0;
+                purchase.dataValues.totalPrice = purchase.totalPrice ? purchase.totalPrice : 0;
 
 
-            const arrayPurchase = await Promise.all(purchase.purchaseItems.map( async (r) => {
-    
-                const flavor = await FlavorService.getByFlavorAndItem(r.flavorId, r.itemId);
-    
-                itensTotalPrice += r.price;
-                return {...r.dataValues, flavor};
-    
-            }));
+                const arrayPurchase = await Promise.all(purchase.purchaseItems.map( async (r) => {
+        
+                    const flavor = await FlavorService.getByFlavorAndItem(r.flavorId, r.itemId);
+        
+                    itensTotalPrice += r.price;
+                    return {...r.dataValues, flavor};
+        
+                }));
 
-            delete purchase.dataValues.purchaseItems;
-            purchase.dataValues.arrayPurchaseItems = arrayPurchase;
-            purchase.dataValues.price = itensTotalPrice;
-            purchase.dataValues.totalPrice = itensTotalPrice + purchase.dataValues.deliveryPrice;
+                delete purchase.dataValues.purchaseItems;
+                purchase.dataValues.arrayPurchaseItems = arrayPurchase;
+                purchase.dataValues.price = itensTotalPrice;
+                purchase.dataValues.totalPrice = itensTotalPrice + purchase.dataValues.deliveryPrice;
 
-            return purchase;
-        }))
+                return purchase;
+            }))
 
-        return res.status(200).json({ purchases: result });
+            purchases.rows = rows;
+
+        } else {
+
+            let rows = await Promise.all( purchases.map( async (purchase) => {
+
+                let itensTotalPrice = 0;
+
+                purchase.dataValues.transshipment = purchase.transshipment ? purchase.transshipment : 0;
+                purchase.dataValues.deliveryPrice = purchase.deliveryPrice ? purchase.deliveryPrice : 0;
+                purchase.dataValues.totalPrice = purchase.totalPrice ? purchase.totalPrice : 0;
+
+
+                const arrayPurchase = await Promise.all(purchase.purchaseItems.map( async (r) => {
+        
+                    const flavor = await FlavorService.getByFlavorAndItem(r.flavorId, r.itemId);
+        
+                    itensTotalPrice += r.price;
+                    return {...r.dataValues, flavor};
+        
+                }));
+
+                delete purchase.dataValues.purchaseItems;
+                purchase.dataValues.arrayPurchaseItems = arrayPurchase;
+                purchase.dataValues.price = itensTotalPrice;
+                purchase.dataValues.totalPrice = itensTotalPrice + purchase.dataValues.deliveryPrice;
+
+                return purchase;
+            }))
+
+            purchases = rows;
+        }
+
+        return res.status(200).json({ purchases });
     } catch (error) {
         return res.status(500).json({ error: `Ocorreu um erro: ${error.message}` });
     }
