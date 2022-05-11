@@ -12,7 +12,7 @@ const transporter = nodemailer.createTransport({
 
 const sendEmail = async (email, token) => {
   const emailOptions = {
-    from: process.env.EMAIL,
+    from: "salgadinhos2finos@gmail.com",
     to: email,
     subject: 'Recuperar senha',
     html: `<body>
